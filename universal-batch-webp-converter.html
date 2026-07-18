@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Batch WebP Converter</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=0Mk3qm8gHRYP_H2ewgWrAhzi5Kbr8JLqpwePdTdYadHET8zDqT6ievho139m9wTNmYjuD__dgBiyvi-DrxRcpt8-YltQlGGPaePwTIbhigWKnHTyGHy23E3V7HmWPdFAw4RCUbQKB4m5k7fFmKAx-uBjuZe6SCrkTWwazwYADpTjgMmpEP2np_Vz5ak9gbUbjy7F1cXia-dARl3ux53ysgNBLTzouVazmk4TfKHV9iP_VRluBSE0AWzum0mryyhPyurFnEdT4rA-W51klE3PixUVOl8baP_HsWwLJ4HynN5B1pjR99suZZHqxzvWVkePoTzer28hvuTznn10qk3-4v103Wy3JPHnwDCwcnvi0jA" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9jb250cmlidXRpb24udXNlcmNvbnRlbnQuZ29vZ2xlLmNvbS9kb3dubG9hZD9jPUNneGlZWEprWDNOMGIzSmhaMlVTVUJJTmNtVnpjRzl1YzJWZlpHRjBZUm9fQ2pBMU5ESTRZVEUwTUdVeE9HRXhPRGd3TURBd05qVTJZMlJpTVRjeFpEQmtNVEEyTmpOaE5EWmpNall5TkdNMk1tWVNDeElIRUpfSTl0akJCUmdCJmZpbGVuYW1lPXVuaXZlcnNhbC1iYXRjaC13ZWJwLWNvbnZlcnRlci5odG1sJm9waT0xMDMxMzUwNTA"/><script type="text/javascript" nonce="345f7c8fd12b478181cf0407438" src="//local.adguard.org?ts=1784291322656&amp;type=content-script&amp;dmn=contribution.usercontent.google.com&amp;url=https%3A%2F%2Fcontribution.usercontent.google.com%2Fdownload%3Fc%3DCgxiYXJkX3N0b3JhZ2USUBINcmVzcG9uc2VfZGF0YRo_CjA1NDI4YTE0MGUxOGExODgwMDAwNjU2Y2RiMTcxZDBkMTA2NjNhNDZjMjYyNGM2MmYSCxIHEJ_I9tjBBRgB%26filename%3Duniversal-batch-webp-converter.html%26opi%3D103135050&amp;app=chrome.exe&amp;css=3&amp;js=1&amp;rel=1&amp;rji=1&amp;sbe=1"></script><script type="text/javascript" nonce="345f7c8fd12b478181cf0407438" src="//local.adguard.org?ts=1784291322656&amp;name=AdGuard%20Extra&amp;type=user-script"></script><script src="https://cdn.tailwindcss.com"></script>
+    <!-- JSZip for dynamic client-side ZIP generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* Smooth transitions for states */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Custom scrollbar for queue list */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 md:p-8">
+
+    <div class="w-full max-w-4xl bg-slate-900 rounded-3xl shadow-2xl border border-slate-800 p-6 md:p-8 flex flex-col gap-6">
+        
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">
+                    Batch WebP Converter
+                </h1>
+                <p class="text-sm text-slate-400 mt-1">Convert multiple images of any format locally in your browser</p>
+            </div>
+            
+            <!-- Global Action Buttons (Hidden when empty) -->
+            <div id="globalActions" class="hidden flex items-center gap-3 w-full md:w-auto">
+                <button id="clearAllBtn" class="flex-1 md:flex-none border border-slate-700 hover:bg-slate-800 text-slate-300 font-medium text-xs px-4 py-2.5 rounded-xl transition-all duration-200">
+                    Clear Queue
+                </button>
+                <button id="downloadAllBtn" class="flex-2 md:flex-none bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs px-5 py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-emerald-500/15">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Download All (.ZIP)
+                </button>
+            </div>
+        </div>
+
+        <!-- Two Column Workspace (Stack on mobile, row on large screens) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            <!-- Left Side: Controls & Upload (5 Columns) -->
+            <div class="lg:col-span-5 flex flex-col gap-5">
+                <!-- Drag & Drop Zone -->
+                <div id="dropZone" class="border-2 border-dashed border-slate-750 hover:border-emerald-500/80 rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 bg-slate-850/50 hover:bg-slate-850/80 group relative min-h-[180px] flex flex-col items-center justify-center">
+                    <!-- allow multiple uploads -->
+                    <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+                    
+                    <div class="space-y-3 pointer-events-none">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-slate-800 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                            <svg class="w-6 h-6 text-slate-400 group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-slate-200">Drag files here, or <span class="text-emerald-400">browse</span></p>
+                            <p class="text-xs text-slate-550 mt-1">Supports PNG, JPG, WebP, AVIF, GIF, BMP, SVG, etc.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quality Settings Panel -->
+                <div class="bg-slate-850/40 p-5 rounded-2xl border border-slate-800/80 space-y-4">
+                    <div class="flex justify-between items-center text-xs font-bold tracking-wider text-slate-400 uppercase">
+                        <span>WebP Compression Quality</span>
+                        <span id="qualityVal" class="text-emerald-400 font-mono text-sm">80%</span>
+                    </div>
+                    <input type="range" id="qualityRange" min="10" max="100" value="80" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+                    <div class="text-[10px] text-slate-500 leading-relaxed">
+                        Lowering quality reduces file sizes significantly, while 80%-90% preserves almost identical visual fidelity.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: List Queue View (7 Columns) -->
+            <div class="lg:col-span-7 flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Files Queue</h2>
+                    <span id="queueCount" class="text-xs bg-slate-800 text-slate-300 font-bold px-2 py-1 rounded-full">0 Images</span>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="border border-slate-800 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-3 min-h-[280px]">
+                    <div class="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <p class="text-sm font-medium text-slate-550">No images imported yet</p>
+                </div>
+
+                <!-- Scrollable List View -->
+                <div id="queueContainer" class="hidden max-h-[420px] overflow-y-auto pr-1 flex flex-col gap-3 custom-scrollbar">
+                    <!-- Dynamic items go here -->
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const qualityRange = document.getElementById('qualityRange');
+        const qualityVal = document.getElementById('qualityVal');
+        
+        const emptyState = document.getElementById('emptyState');
+        const queueContainer = document.getElementById('queueContainer');
+        const queueCount = document.getElementById('queueCount');
+        const globalActions = document.getElementById('globalActions');
+        
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const downloadAllBtn = document.getElementById('downloadAllBtn');
+
+        // Main state tracking
+        let fileQueue = [];
+
+        // Quality slider update triggers asynchronous bulk re-compression
+        qualityRange.addEventListener('input', (e) => {
+            qualityVal.textContent = `${e.target.value}%`;
+            recompressAll();
+        });
+
+        // Trigger native file picker
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleFiles(e.target.files);
+        });
+
+        // Drag/Drop Interface handlers
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('border-emerald-500/80', 'bg-slate-850/80');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('border-emerald-500/80', 'bg-slate-850/80');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) handleFiles(files);
+        });
+
+        // Parse through selected files
+        function handleFiles(files) {
+            const list = Array.from(files).filter(file => file.type.startsWith('image/'));
+            if (list.length === 0) return;
+
+            list.forEach(file => {
+                const fileId = 'img_' + Math.random().toString(36).substr(2, 9);
+                const fileObj = {
+                    id: fileId,
+                    file: file,
+                    name: file.name,
+                    originalSize: file.size,
+                    webpBlob: null,
+                    webpSize: 0,
+                    webpUrl: null,
+                    imageElement: null, // Stored to make quality tweaks rapid
+                    status: 'loading'
+                };
+
+                fileQueue.push(fileObj);
+                addQueueItemToDOM(fileObj);
+                
+                // Initialize reader to read file into memory
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function () {
+                        fileObj.imageElement = img;
+                        compressSingle(fileObj);
+                    };
+                };
+            });
+
+            updateUIState();
+        }
+
+        // Add visual skeleton line directly into queue display
+        function addQueueItemToDOM(item) {
+            const html = `
+                <div id="${item.id}" class="bg-slate-900 border border-slate-800 hover:border-slate-750 p-4 rounded-2xl flex items-center gap-4 transition-all duration-200 fade-in">
+                    <!-- Thumbnail preview -->
+                    <div class="relative w-12 h-12 shrink-0 bg-slate-950 rounded-lg overflow-hidden border border-slate-800 flex items-center justify-center">
+                        <img id="thumb_${item.id}" class="w-full h-full object-cover hidden" />
+                        <div id="loader_${item.id}" class="absolute inset-0 flex items-center justify-center bg-slate-950">
+                            <div class="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata details -->
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-bold truncate text-slate-200 mb-1" title="${item.name}">${item.name}</h4>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-[10px] font-mono text-slate-400 bg-slate-800/80 px-1.5 py-0.5 rounded uppercase">
+                                ${item.name.substring(item.name.lastIndexOf('.') + 1) || 'IMG'}
+                            </span>
+                            <span class="text-xs text-slate-500" id="orig_size_${item.id}">${formatBytes(item.originalSize)}</span>
+                            <span class="text-slate-600 text-xs shrink-0">&rarr;</span>
+                            <span class="text-xs text-slate-400 font-semibold font-mono hidden" id="webp_size_${item.id}">-</span>
+                            <span class="text-emerald-400 text-xs font-bold font-mono bg-emerald-500/10 px-1.5 py-0.5 rounded-full hidden" id="saving_${item.id}">-</span>
+                        </div>
+                    </div>
+
+                    <!-- Actions / Controls -->
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a id="down_${item.id}" href="#" download="" class="hidden p-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-emerald-500 hover:text-slate-950 transition-all duration-200" title="Download WebP">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </a>
+                        <button onclick="removeQueueItem('${item.id}')" class="p-2 rounded-xl hover:bg-slate-850 hover:text-rose-400 text-slate-500 transition-colors" title="Remove">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            queueContainer.insertAdjacentHTML('beforeend', html);
+        }
+
+        // Compress single dynamic engine instance
+        function compressSingle(item) {
+            const img = item.imageElement;
+            if (!img) return;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+
+            const quality = parseFloat(qualityRange.value) / 100;
+
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+
+                // Handle Blob allocation adjustments
+                if (item.webpUrl) URL.revokeObjectURL(item.webpUrl);
+
+                item.webpBlob = blob;
+                item.webpSize = blob.size;
+                item.webpUrl = URL.createObjectURL(blob);
+                item.status = 'done';
+
+                // DOM Node updates
+                const thumb = document.getElementById(`thumb_${item.id}`);
+                const loader = document.getElementById(`loader_${item.id}`);
+                const origSizeBadge = document.getElementById(`orig_size_${item.id}`);
+                const webpSizeBadge = document.getElementById(`webp_size_${item.id}`);
+                const savingBadge = document.getElementById(`saving_${item.id}`);
+                const downBtn = document.getElementById(`down_${item.id}`);
+
+                // Assign WebP local URL to image thumbnail
+                thumb.src = item.webpUrl;
+                thumb.classList.remove('hidden');
+                loader.classList.add('hidden');
+
+                // Display sizing math comparisons
+                webpSizeBadge.textContent = formatBytes(item.webpSize);
+                webpSizeBadge.classList.remove('hidden');
+
+                const ratio = ((item.originalSize - item.webpSize) / item.originalSize) * 100;
+                if (ratio > 0) {
+                    savingBadge.textContent = `-${ratio.toFixed(0)}%`;
+                    savingBadge.className = "text-emerald-400 text-[10px] font-bold font-mono bg-emerald-500/10 px-1.5 py-0.5 rounded-full";
+                } else {
+                    savingBadge.textContent = `+${Math.abs(ratio).toFixed(0)}%`;
+                    savingBadge.className = "text-rose-400 text-[10px] font-bold font-mono bg-rose-500/10 px-1.5 py-0.5 rounded-full";
+                }
+                savingBadge.classList.remove('hidden');
+
+                // Activate download controls on file element directly
+                downBtn.href = item.webpUrl;
+                const baseName = item.name.substring(0, item.name.lastIndexOf('.')) || item.name;
+                downBtn.setAttribute('download', `${baseName}.webp`);
+                downBtn.classList.remove('hidden');
+
+            }, 'image/webp', quality);
+        }
+
+        // Loop array values to update when slider quality adjusts
+        function recompressAll() {
+            fileQueue.forEach(item => {
+                if (item.status === 'done') {
+                    // Update loader visual state
+                    document.getElementById(`loader_${item.id}`).classList.remove('hidden');
+                    document.getElementById(`thumb_${item.id}`).classList.add('hidden');
+                    compressSingle(item);
+                }
+            });
+        }
+
+        // Clear individual queue selection
+        window.removeQueueItem = function(id) {
+            const idx = fileQueue.findIndex(item => item.id === id);
+            if (idx !== -1) {
+                // Free memory
+                if (fileQueue[idx].webpUrl) URL.revokeObjectURL(fileQueue[idx].webpUrl);
+                fileQueue.splice(idx, 1);
+            }
+            const el = document.getElementById(id);
+            if (el) el.remove();
+            updateUIState();
+        };
+
+        // Reset system entirely
+        clearAllBtn.addEventListener('click', () => {
+            fileQueue.forEach(item => {
+                if (item.webpUrl) URL.revokeObjectURL(item.webpUrl);
+            });
+            fileQueue = [];
+            queueContainer.innerHTML = '';
+            updateUIState();
+        });
+
+        // Trigger dynamic zip packaging
+        downloadAllBtn.addEventListener('click', async () => {
+            if (fileQueue.length === 0) return;
+
+            // Update UI indicating compile
+            downloadAllBtn.disabled = true;
+            downloadAllBtn.innerHTML = `
+                <div class="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></div>
+                Creating ZIP...
+            `;
+
+            const zip = new JSZip();
+            fileQueue.forEach(item => {
+                if (item.webpBlob) {
+                    const baseName = item.name.substring(0, item.name.lastIndexOf('.')) || item.name;
+                    zip.file(`${baseName}.webp`, item.webpBlob);
+                }
+            });
+
+            const content = await zip.generateAsync({ type: "blob" });
+            const zipUrl = URL.createObjectURL(content);
+
+            const downloadLink = document.createElement("a");
+            downloadLink.href = zipUrl;
+            downloadLink.download = "webp_images_archive.zip";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            // Restore button visual states
+            downloadAllBtn.disabled = false;
+            downloadAllBtn.innerHTML = `
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download All (.ZIP)
+            `;
+            URL.revokeObjectURL(zipUrl);
+        });
+
+        // Toggles visibility states for empty queue items vs loaded rows
+        function updateUIState() {
+            const count = fileQueue.length;
+            queueCount.textContent = `${count} Image${count !== 1 ? 's' : ''}`;
+
+            if (count > 0) {
+                emptyState.classList.add('hidden');
+                queueContainer.classList.remove('hidden');
+                globalActions.classList.remove('hidden');
+            } else {
+                emptyState.classList.remove('hidden');
+                queueContainer.classList.add('hidden');
+                globalActions.classList.add('hidden');
+            }
+        }
+
+        // Standard dynamic scale formatting helper
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html>
